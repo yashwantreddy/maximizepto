@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MaximizePTO | 2026 Holiday Planner</title>
+    <meta name="description"
+        content="Optimize your vacation days with our 2026 PTO Planner. Get the most out of long weekends and federal holidays.">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="dark-theme">
+    <div class="app-container">
+        <aside class="sidebar glass">
+            <header class="sidebar-header">
+                <div class="logo">
+                    <span class="icon">✈️</span>
+                    <h1>Maximize<span>PTO</span></h1>
+                </div>
+                <p class="subtitle">Strategize your 2026 escapes</p>
+            </header>
+
+            <section class="controls">
+                <div class="input-group">
+                    <label for="accrual-rate">Monthly PTO Accrual</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="accrual-rate" placeholder="e.g. 1.5" step="0.1" value="1.5" min="0">
+                        <span class="unit">days</span>
+                    </div>
+                    <p class="input-hint">Total annual PTO: <span id="annual-total">18</span> days</p>
+                </div>
+
+                <div class="input-group">
+                    <label for="aggressiveness">Strategy Aggressiveness</label>
+                    <div class="slider-wrapper">
+                        <input type="range" id="aggressiveness" min="1" max="3" value="2" step="1">
+                        <div class="slider-labels">
+                            <span>Balance</span>
+                            <span id="aggressiveness-label">Medium</span>
+                            <span>Bold</span>
+                        </div>
+                    </div>
+                    <p class="input-hint">Controls how many days are bundled.</p>
+                </div>
+
+                <div class="input-group">
+                    <label>Observed Holidays</label>
+                    <div id="holiday-toggle-list" class="holiday-list glass-inset">
+                        <!-- Standard holidays injected here -->
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Add Custom Holiday</label>
+                    <div class="custom-holiday-form">
+                        <input type="text" id="custom-h-name" placeholder="Name (e.g. Summer Friday)">
+                        <input type="date" id="custom-h-date" min="2026-01-01" max="2026-12-31">
+                        <button id="add-custom-h" class="btn-primary">+</button>
+                    </div>
+                    <div id="custom-holidays-list" class="custom-list">
+                        <!-- Custom holidays injected here -->
+                    </div>
+                </div>
+
+                <div class="stats-card glass-vibrant">
+                    <div class="stat">
+                        <span class="stat-label">Used</span>
+                        <span class="stat-value" id="pto-used">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Remaining</span>
+                        <span class="stat-value" id="pto-remaining">18</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="suggestions-section">
+                <h3>Recommended Strategies</h3>
+                <div id="suggestions-list" class="suggestions-list">
+                    <!-- Suggestions will be injected here -->
+                    <div class="empty-state">Calculating optimal dates...</div>
+                </div>
+            </section>
+
+            <footer class="sidebar-footer">
+                <p>&copy; 2025 Antigravity Lab. Built for 2026.</p>
+            </footer>
+        </aside>
+
+        <main class="calendar-panel">
+            <header class="main-header">
+                <div class="year-selector">
+                    <h2>2026</h2>
+                </div>
+                <div class="legend">
+                    <div class="legend-item"><span class="dot holiday"></span> Holiday</div>
+                    <div class="legend-item"><span class="dot pto"></span> Recommended PTO</div>
+                    <div class="legend-item"><span class="dot weekend"></span> Weekend</div>
+                </div>
+            </header>
+
+            <div id="calendar-grid" class="calendar-grid">
+                <!-- Months will be injected here -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal for details (optional) -->
+    <div id="modal-overlay" class="modal-overlay hidden">
+        <div class="modal glass">
+            <button id="close-modal" class="close-btn">&times;</button>
+            <div id="modal-content"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
