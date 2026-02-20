@@ -32,4 +32,21 @@ describe('planner engine', () => {
     expect(metrics.utilizationRate).toBeLessThanOrEqual(100);
     expect(['Low', 'Medium', 'High']).toContain(metrics.unusedRisk);
   });
+
+  it('computes per-strategy totals only from windows that include that strategy PTO', () => {
+    const result = calculateOptimalPTO({
+      year: YEAR,
+      budget: 1,
+      aggressiveness: 1,
+      activeHolidays: [
+        { id: 'x1', date: '2026-01-01', name: 'New Year Seed' },
+        { id: 'x2', date: '2026-07-03', name: 'Summer Friday Seed' }
+      ]
+    });
+
+    expect(result.strategies).toHaveLength(1);
+    expect(result.suggestedPTO).toEqual(['2026-01-02']);
+    expect(result.strategies[0].vacationDays).toBe(4);
+    expect(result.strategies[0].longest).toBe(4);
+  });
 });

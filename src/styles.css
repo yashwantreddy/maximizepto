@@ -1006,63 +1006,6 @@ kbd {
   transform: translateX(-50%) translateY(0);
 }
 
-.onboarding-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(21, 24, 31, 0.5);
-  backdrop-filter: blur(3px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 120;
-  padding: 1rem;
-  animation: fade-in 0.2s ease-out;
-}
-
-.onboarding-card {
-  width: min(540px, 100%);
-  border-radius: 18px;
-  background: linear-gradient(160deg, #fff9eb, #fff3db);
-  border: 1px solid #f0dfb7;
-  box-shadow: 0 20px 48px rgba(24, 27, 35, 0.24);
-  padding: 1.15rem;
-}
-
-.onboarding-card h3 {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: 1.55rem;
-}
-
-.onboarding-card p {
-  margin: 0.62rem 0 0;
-  color: var(--ink-800);
-  font-size: 0.95rem;
-}
-
-.onboarding-progress {
-  margin-top: 0.95rem;
-  height: 10px;
-  border-radius: 999px;
-  background: #eddcb8;
-  overflow: hidden;
-}
-
-.onboarding-progress span {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, var(--ocean-500), #3eb19b);
-  transition: width 0.24s ease;
-}
-
-.onboarding-controls {
-  margin-top: 0.95rem;
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.45rem;
-}
-
 @keyframes rise {
   from {
     opacity: 0;
@@ -1086,16 +1029,6 @@ kbd {
 
   100% {
     transform: translateY(0px) rotate(0deg);
-  }
-}
-
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
   }
 }
 
@@ -1191,8 +1124,7 @@ kbd {
 @media print {
   .atmosphere,
   .control-rail,
-  .action-panel,
-  .onboarding-overlay {
+  .action-panel {
     display: none !important;
   }
 

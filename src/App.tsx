@@ -3,7 +3,6 @@ import { ActionBar } from './components/ActionBar';
 import { CalendarCanvas } from './components/CalendarCanvas';
 import { ControlRail } from './components/ControlRail';
 import { HeroMetrics } from './components/HeroMetrics';
-import { OnboardingModal } from './components/OnboardingModal';
 import { ScenarioLab } from './components/ScenarioLab';
 import { StrategyStudio } from './components/StrategyStudio';
 import { formatDateRange } from './lib/planner';
@@ -12,7 +11,6 @@ import { calculateOptimalPTO, calculateOverviewMetrics, getActiveHolidays } from
 import type { Holiday, PlannerState } from './types';
 
 const STORAGE_KEY = 'pto-planner-state';
-const ONBOARDING_KEY = 'pto-onboarding-complete-v1';
 const AGGRESSIVENESS_LABELS = ['Chill', 'Balanced', 'Max Out'] as const;
 
 function getDefaultState(): PlannerState {
@@ -69,13 +67,6 @@ export default function App() {
   const [customHolidayDate, setCustomHolidayDate] = useState('');
   const [selectedStrategyName, setSelectedStrategyName] = useState('');
   const [actionStatusMessage, setActionStatusMessage] = useState('Ready to export your plan.');
-  const [showOnboarding, setShowOnboarding] = useState(() => {
-    if (typeof window === 'undefined') {
-      return false;
-    }
-
-    return localStorage.getItem(ONBOARDING_KEY) !== 'true';
-  });
   const [comparisonAggressiveness, setComparisonAggressiveness] = useState(
     plannerState.aggressiveness === 3 ? 2 : 3
   );
@@ -288,16 +279,6 @@ export default function App() {
     setActionStatus('Print dialog opened.');
   }, [setActionStatus]);
 
-  const completeOnboarding = useCallback(() => {
-    localStorage.setItem(ONBOARDING_KEY, 'true');
-    setShowOnboarding(false);
-  }, []);
-
-  const dismissOnboarding = useCallback(() => {
-    localStorage.setItem(ONBOARDING_KEY, 'true');
-    setShowOnboarding(false);
-  }, []);
-
   useEffect(() => {
     const onShortcut = (event: KeyboardEvent) => {
       const activeElement = document.activeElement as HTMLElement | null;
@@ -309,12 +290,6 @@ export default function App() {
         Boolean(activeElement?.isContentEditable);
 
       const key = event.key.toLowerCase();
-      if (key === 'escape' && showOnboarding) {
-        event.preventDefault();
-        dismissOnboarding();
-        return;
-      }
-
       if (isTyping) {
         return;
       }
@@ -322,12 +297,6 @@ export default function App() {
       if (event.key === '/') {
         event.preventDefault();
         document.getElementById('accrual-rate')?.focus();
-        return;
-      }
-
-      if (event.key === '?') {
-        event.preventDefault();
-        setShowOnboarding((current) => !current);
         return;
       }
 
@@ -346,12 +315,18 @@ export default function App() {
       if (key === 'm') {
         event.preventDefault();
         handleCopyManagerSummary();
+        return;
+      }
+
+      if (key === 'p') {
+        event.preventDefault();
+        handlePrintPlan();
       }
     };
 
     document.addEventListener('keydown', onShortcut);
     return () => document.removeEventListener('keydown', onShortcut);
-  }, [dismissOnboarding, handleCopyManagerSummary, handleExportCsv, showOnboarding]);
+  }, [handleCopyManagerSummary, handleExportCsv, handlePrintPlan]);
 
   return (
     <>
@@ -369,10 +344,10 @@ export default function App() {
       <div className="site-shell">
         <header className="hero">
           <p className="eyebrow">PTO Escape Atelier</p>
-          <h1>Plan Longer Vacations With the Leave You Already Have</h1>
+          <h1>Turn the Leave You Already Have Into Longer, Better Vacations</h1>
           <p className="hero-copy">
-            Transform routine leave days into strategic long breaks. Build your 2026 escape seasons
-            with ranked recommendations and a visual planning canvas.
+            Stretch each PTO day further with ranked break windows, connected calendar ribbons, and
+            scenario comparisons you can confidently share with your manager.
           </p>
           <HeroMetrics metrics={metrics} />
         </header>
@@ -492,11 +467,6 @@ export default function App() {
           </main>
         </div>
       </div>
-      <OnboardingModal
-        isOpen={showOnboarding}
-        onClose={dismissOnboarding}
-        onComplete={completeOnboarding}
-      />
     </>
   );
 }

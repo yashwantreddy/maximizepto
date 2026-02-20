@@ -33,7 +33,7 @@ export function ActionBar({
             <kbd>m</kbd> copy summary
           </span>
           <span>
-            <kbd>?</kbd> onboarding
+            <kbd>p</kbd> print plan
           </span>
         </div>
       </div>

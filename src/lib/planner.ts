@@ -1,5 +1,12 @@
 import type { Holiday, OverviewMetrics, PlannerResult, Strategy } from '../types';
-import { buildOffdaySet, formatISODate, getBreakWindows, parseISODate, shortenDate } from './dates';
+import {
+  buildOffdaySet,
+  enumerateISODateRange,
+  formatISODate,
+  getBreakWindows,
+  parseISODate,
+  shortenDate
+} from './dates';
 
 interface PlannerInput {
   year: number;
@@ -130,18 +137,20 @@ export function calculateOptimalPTO({
   const strategies: Strategy[] = Array.from(strategyDatesByName.entries())
     .map(([name, datesSet]) => {
       const dates = Array.from(datesSet).sort();
+      const strategyDateSet = new Set(dates);
       const offSet = buildOffdaySet(
         year,
         activeHolidays.map((holiday) => holiday.date),
         dates
       );
       const windows = getBreakWindows(year, offSet);
+      const relevantWindows = windows.filter((window) =>
+        enumerateISODateRange(window.start, window.end).some((dateIso) => strategyDateSet.has(dateIso))
+      );
 
-      const vacationDays = windows
-        .filter((window) => window.length >= 3)
-        .reduce((total, window) => total + window.length, 0);
-      const longest = windows.reduce((max, window) => Math.max(max, window.length), 0);
-      const micro = windows.filter((window) => window.length >= 3 && window.length <= 4).length;
+      const vacationDays = relevantWindows.reduce((total, window) => total + window.length, 0);
+      const longest = relevantWindows.reduce((max, window) => Math.max(max, window.length), 0);
+      const micro = relevantWindows.filter((window) => window.length >= 3 && window.length <= 4).length;
       const ptoDays = dates.length;
       const yieldScore = ptoDays ? Number((vacationDays / ptoDays).toFixed(1)) : 0;
       const rank = vacationDays * 2 + longest * 1.25 - ptoDays * 0.75;

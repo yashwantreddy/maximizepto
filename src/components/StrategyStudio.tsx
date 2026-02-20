@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { formatDateRange } from '../lib/planner';
 import type { Strategy } from '../types';
 
@@ -14,6 +15,21 @@ export function StrategyStudio({
   energyLine,
   onSelectStrategy
 }: StrategyStudioProps) {
+  const chronologicalStrategies = useMemo(() => {
+    return strategies
+      .slice()
+      .sort((a, b) => {
+        const aFirst = a.dates[0] ?? '9999-12-31';
+        const bFirst = b.dates[0] ?? '9999-12-31';
+
+        if (aFirst !== bFirst) {
+          return aFirst.localeCompare(bFirst);
+        }
+
+        return a.name.localeCompare(b.name);
+      });
+  }, [strategies]);
+
   return (
     <section className="panel studio-panel">
       <div className="studio-header">
@@ -25,13 +41,13 @@ export function StrategyStudio({
       </div>
 
       <div className="suggestions-list">
-        {!strategies.length ? (
+        {!chronologicalStrategies.length ? (
           <div className="empty-state">
             No strategy windows yet. Increase accrual, enable holidays, or switch to a bolder
             intensity level.
           </div>
         ) : (
-          strategies.map((strategy) => {
+          chronologicalStrategies.map((strategy) => {
             const active = strategy.name === selectedStrategyName;
             return (
               <article
@@ -53,13 +69,13 @@ export function StrategyStudio({
                   <span className="badge pto">{strategy.ptoDays} PTO</span>
                 </div>
                 <p className="suggestion-body">
-                  Spend {strategy.ptoDays} PTO day(s) to access {strategy.vacationDays} total off day(s), with a
-                  longest break of {strategy.longest} day(s).
+                  Apply these {strategy.ptoDays} PTO day(s) to secure a {strategy.longest}-day
+                  headline break.
                 </p>
                 <div className="suggestion-meta">
                   <span className="badge yield">Yield {strategy.yieldScore.toFixed(1)}x</span>
-                  <span className="meta-pill">Window {formatDateRange(strategy.dates)}</span>
-                  <span className="meta-pill">{strategy.micro} micro-break(s)</span>
+                  <span className="meta-pill">Take PTO: {formatDateRange(strategy.dates)}</span>
+                  <span className="meta-pill">{strategy.vacationDays} total day(s) off</span>
                 </div>
               </article>
             );

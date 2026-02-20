@@ -31,6 +31,7 @@ test-results/
 # Package manager caches
 .npm/
 .pnpm-store/
+.vercel/
 
 # Editor/IDE
 .idea/

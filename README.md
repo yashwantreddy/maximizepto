@@ -19,6 +19,20 @@ npm run dev
 
 Then open `http://localhost:5173`.
 
+## Deploy (Vercel)
+
+This repo is configured for Vercel with `vercel.json`.
+
+1. Import the repository into Vercel.
+2. Keep default settings (Framework: `Vite`, Build: `npm run build`, Output: `dist`).
+3. Deploy.
+
+For CLI deploys:
+
+```bash
+npx vercel
+```
+
 ## Scripts
 
 - `npm run dev` - start local dev server
