@@ -27,7 +27,8 @@ export function StrategyStudio({
       <div className="suggestions-list">
         {!strategies.length ? (
           <div className="empty-state">
-            No strategies yet. Increase PTO budget or add holidays.
+            No strategy windows yet. Increase accrual, enable holidays, or switch to a bolder
+            intensity level.
           </div>
         ) : (
           strategies.map((strategy) => {

@@ -1,13 +1,19 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ActionBar } from './components/ActionBar';
 import { CalendarCanvas } from './components/CalendarCanvas';
 import { ControlRail } from './components/ControlRail';
 import { HeroMetrics } from './components/HeroMetrics';
+import { OnboardingModal } from './components/OnboardingModal';
+import { ScenarioLab } from './components/ScenarioLab';
 import { StrategyStudio } from './components/StrategyStudio';
+import { formatDateRange } from './lib/planner';
 import { DEFAULT_FEDERAL_HOLIDAYS, YEAR } from './data/holidays';
 import { calculateOptimalPTO, calculateOverviewMetrics, getActiveHolidays } from './lib/planner';
 import type { Holiday, PlannerState } from './types';
 
 const STORAGE_KEY = 'pto-planner-state';
+const ONBOARDING_KEY = 'pto-onboarding-complete-v1';
+const AGGRESSIVENESS_LABELS = ['Chill', 'Balanced', 'Max Out'] as const;
 
 function getDefaultState(): PlannerState {
   return {
@@ -62,6 +68,17 @@ export default function App() {
   const [customHolidayName, setCustomHolidayName] = useState('');
   const [customHolidayDate, setCustomHolidayDate] = useState('');
   const [selectedStrategyName, setSelectedStrategyName] = useState('');
+  const [actionStatusMessage, setActionStatusMessage] = useState('Ready to export your plan.');
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+
+    return localStorage.getItem(ONBOARDING_KEY) !== 'true';
+  });
+  const [comparisonAggressiveness, setComparisonAggressiveness] = useState(
+    plannerState.aggressiveness === 3 ? 2 : 3
+  );
 
   const annualTotal = plannerState.accrualRate * 12;
 
@@ -91,6 +108,28 @@ export default function App() {
     [annualTotal, activeHolidays, plannerResult.suggestedPTO]
   );
 
+  const comparisonPlannerResult = useMemo(
+    () =>
+      calculateOptimalPTO({
+        year: YEAR,
+        budget: Math.floor(annualTotal),
+        aggressiveness: comparisonAggressiveness,
+        activeHolidays
+      }),
+    [annualTotal, comparisonAggressiveness, activeHolidays]
+  );
+
+  const comparisonMetrics = useMemo(
+    () =>
+      calculateOverviewMetrics(
+        YEAR,
+        annualTotal,
+        activeHolidays,
+        comparisonPlannerResult.suggestedPTO
+      ),
+    [annualTotal, activeHolidays, comparisonPlannerResult.suggestedPTO]
+  );
+
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(plannerState));
   }, [plannerState]);
@@ -106,19 +145,18 @@ export default function App() {
   }, [plannerResult.strategies, selectedStrategyName]);
 
   useEffect(() => {
-    const onSlashFocus = (event: KeyboardEvent) => {
-      const activeTag = (document.activeElement?.tagName ?? '').toLowerCase();
-      if (event.key === '/' && activeTag !== 'input' && activeTag !== 'textarea') {
-        event.preventDefault();
-        document.getElementById('accrual-rate')?.focus();
-      }
-    };
+    if (comparisonAggressiveness === plannerState.aggressiveness) {
+      setComparisonAggressiveness(plannerState.aggressiveness === 3 ? 2 : 3);
+    }
+  }, [comparisonAggressiveness, plannerState.aggressiveness]);
 
-    document.addEventListener('keydown', onSlashFocus);
-    return () => document.removeEventListener('keydown', onSlashFocus);
-  }, []);
+  const aggressivenessLabel = AGGRESSIVENESS_LABELS[plannerState.aggressiveness - 1];
+  const comparisonLabel = AGGRESSIVENESS_LABELS[comparisonAggressiveness - 1];
 
-  const aggressivenessLabel = ['Chill', 'Balanced', 'Max Out'][plannerState.aggressiveness - 1];
+  const selectedStrategy = useMemo(
+    () => plannerResult.strategies.find((strategy) => strategy.name === selectedStrategyName),
+    [plannerResult.strategies, selectedStrategyName]
+  );
 
   const energyLine = useMemo(() => {
     const top = plannerResult.strategies[0];
@@ -129,8 +167,198 @@ export default function App() {
     return `${top.name} is strongest: ${top.ptoDays} PTO day(s) unlock ${top.vacationDays} off day(s) with a ${metrics.yieldScore.toFixed(1)}x portfolio yield.`;
   }, [plannerResult.strategies, metrics.yieldScore]);
 
+  const managerSummary = useMemo(() => {
+    const top = plannerResult.strategies[0];
+    const selectedRange = selectedStrategy ? formatDateRange(selectedStrategy.dates) : 'n/a';
+    const holidayCount = activeHolidays.length;
+
+    return [
+      `2026 PTO Plan Summary`,
+      `Strategy level: ${aggressivenessLabel}`,
+      `Annual PTO available: ${annualTotal.toFixed(1)} days`,
+      `Recommended PTO usage: ${plannerResult.suggestedPTO.length} days`,
+      `Utilization: ${metrics.utilizationRate.toFixed(1)}%`,
+      `Vacation yield: ${metrics.yieldScore.toFixed(1)}x`,
+      `Longest break: ${metrics.longestBreak} days`,
+      `Active holidays: ${holidayCount}`,
+      top
+        ? `Top strategy: ${top.name} (${top.ptoDays} PTO day(s) -> ${top.vacationDays} off day(s))`
+        : 'Top strategy: none generated',
+      selectedStrategy ? `Selected window: ${selectedRange}` : 'Selected window: none',
+      `Generated from MaximizePTO Escape Atelier`
+    ].join('\n');
+  }, [
+    activeHolidays.length,
+    aggressivenessLabel,
+    annualTotal,
+    metrics.longestBreak,
+    metrics.utilizationRate,
+    metrics.yieldScore,
+    plannerResult.strategies,
+    plannerResult.suggestedPTO.length,
+    selectedStrategy
+  ]);
+
+  const setActionStatus = useCallback((message: string) => {
+    setActionStatusMessage(message);
+  }, []);
+
+  const handleExportCsv = useCallback(() => {
+    if (!plannerResult.suggestedPTO.length) {
+      setActionStatus('No PTO suggestions to export yet.');
+      return;
+    }
+
+    const header = ['Date', 'Type', 'Strategy', 'Notes'];
+    const selectedSet = new Set(selectedStrategy?.dates ?? []);
+    const holidayByDate = activeHolidays.reduce<Record<string, string>>((map, holiday) => {
+      map[holiday.date] = holiday.name;
+      return map;
+    }, {});
+
+    const rows = plannerResult.suggestedPTO
+      .slice()
+      .sort()
+      .map((date) => {
+        const notes = holidayByDate[date] ? `Near ${holidayByDate[date]}` : 'Suggested PTO';
+        const strategy = selectedSet.has(date) ? selectedStrategyName : '';
+        return [date, 'PTO', strategy, notes];
+      });
+
+    const csv = [header, ...rows]
+      .map((row) => row.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(','))
+      .join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'maximizepto-2026-plan.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    setActionStatus('CSV exported: maximizepto-2026-plan.csv');
+  }, [
+    activeHolidays,
+    plannerResult.suggestedPTO,
+    selectedStrategy,
+    selectedStrategyName,
+    setActionStatus
+  ]);
+
+  const copyTextToClipboard = useCallback(async (text: string): Promise<boolean> => {
+    if (navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    return false;
+  }, []);
+
+  const handleCopyManagerSummary = useCallback((): void => {
+    void (async () => {
+      const copied = await copyTextToClipboard(managerSummary);
+      if (copied) {
+        setActionStatus('Manager summary copied to clipboard.');
+        return;
+      }
+
+      const textarea = document.createElement('textarea');
+      textarea.value = managerSummary;
+      textarea.setAttribute('readonly', '');
+      textarea.style.position = 'absolute';
+      textarea.style.left = '-9999px';
+      document.body.appendChild(textarea);
+      textarea.select();
+      const success = document.execCommand('copy');
+      document.body.removeChild(textarea);
+
+      setActionStatus(success ? 'Manager summary copied to clipboard.' : 'Copy failed. Please try again.');
+    })();
+  }, [copyTextToClipboard, managerSummary, setActionStatus]);
+
+  const handlePrintPlan = useCallback(() => {
+    window.print();
+    setActionStatus('Print dialog opened.');
+  }, [setActionStatus]);
+
+  const completeOnboarding = useCallback(() => {
+    localStorage.setItem(ONBOARDING_KEY, 'true');
+    setShowOnboarding(false);
+  }, []);
+
+  const dismissOnboarding = useCallback(() => {
+    localStorage.setItem(ONBOARDING_KEY, 'true');
+    setShowOnboarding(false);
+  }, []);
+
+  useEffect(() => {
+    const onShortcut = (event: KeyboardEvent) => {
+      const activeElement = document.activeElement as HTMLElement | null;
+      const activeTag = (activeElement?.tagName ?? '').toLowerCase();
+      const isTyping =
+        activeTag === 'input' ||
+        activeTag === 'textarea' ||
+        activeTag === 'select' ||
+        Boolean(activeElement?.isContentEditable);
+
+      const key = event.key.toLowerCase();
+      if (key === 'escape' && showOnboarding) {
+        event.preventDefault();
+        dismissOnboarding();
+        return;
+      }
+
+      if (isTyping) {
+        return;
+      }
+
+      if (event.key === '/') {
+        event.preventDefault();
+        document.getElementById('accrual-rate')?.focus();
+        return;
+      }
+
+      if (event.key === '?') {
+        event.preventDefault();
+        setShowOnboarding((current) => !current);
+        return;
+      }
+
+      if (key === 'g') {
+        event.preventDefault();
+        document.getElementById('calendar-canvas')?.scrollIntoView({ behavior: 'smooth' });
+        return;
+      }
+
+      if (key === 'e') {
+        event.preventDefault();
+        handleExportCsv();
+        return;
+      }
+
+      if (key === 'm') {
+        event.preventDefault();
+        handleCopyManagerSummary();
+      }
+    };
+
+    document.addEventListener('keydown', onShortcut);
+    return () => document.removeEventListener('keydown', onShortcut);
+  }, [dismissOnboarding, handleCopyManagerSummary, handleExportCsv, showOnboarding]);
+
   return (
     <>
+      <a href="#planner-main" className="skip-link">
+        Skip to planner workspace
+      </a>
+
       <div className="atmosphere" aria-hidden="true">
         <div className="sun" />
         <div className="mesh mesh-a" />
@@ -230,7 +458,18 @@ export default function App() {
             }
           />
 
-          <main className="plan-stage">
+          <main className="plan-stage" id="planner-main">
+            <ScenarioLab
+              baseAggressiveness={plannerState.aggressiveness}
+              baseLabel={aggressivenessLabel}
+              baseMetrics={metrics}
+              basePtoUsed={plannerResult.suggestedPTO.length}
+              compareAggressiveness={comparisonAggressiveness}
+              compareLabel={comparisonLabel}
+              compareMetrics={comparisonMetrics}
+              comparePtoUsed={comparisonPlannerResult.suggestedPTO.length}
+              onCompareAggressivenessChange={setComparisonAggressiveness}
+            />
             <StrategyStudio
               strategies={plannerResult.strategies}
               selectedStrategyName={selectedStrategyName}
@@ -244,9 +483,20 @@ export default function App() {
               selectedStrategyName={selectedStrategyName}
               strategies={plannerResult.strategies}
             />
+            <ActionBar
+              onExportCsv={handleExportCsv}
+              onCopyManagerSummary={handleCopyManagerSummary}
+              onPrintPlan={handlePrintPlan}
+              statusMessage={actionStatusMessage}
+            />
           </main>
         </div>
       </div>
+      <OnboardingModal
+        isOpen={showOnboarding}
+        onClose={dismissOnboarding}
+        onComplete={completeOnboarding}
+      />
     </>
   );
 }

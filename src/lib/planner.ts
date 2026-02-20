@@ -187,6 +187,7 @@ export function calculateOverviewMetrics(
   const used = suggestedPTO.length;
   const yieldScore = used ? vacationDays / used : 0;
   const unused = Math.max(annualTotal - used, 0);
+  const utilizationRate = annualTotal > 0 ? Math.min((used / annualTotal) * 100, 100) : 0;
 
   let unusedRisk: OverviewMetrics['unusedRisk'] = 'Low';
   if (unused > 6) {
@@ -200,7 +201,8 @@ export function calculateOverviewMetrics(
     longestBreak,
     microBreaks,
     unusedRisk,
-    vacationDays
+    vacationDays,
+    utilizationRate
   };
 }
 

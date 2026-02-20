@@ -26,6 +26,7 @@ export interface OverviewMetrics {
   microBreaks: number;
   unusedRisk: 'Low' | 'Medium' | 'High';
   vacationDays: number;
+  utilizationRate: number;
 }
 
 export interface BreakWindow {

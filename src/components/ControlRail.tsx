@@ -87,6 +87,7 @@ export function ControlRail({
               key={level}
               type="button"
               className={`preset-btn ${level === aggressiveness ? 'active' : ''}`}
+              aria-pressed={level === aggressiveness}
               onClick={() => onPresetSelect(level)}
             >
               {level === 1 ? 'Chill' : level === 2 ? 'Balanced' : 'Max Out'}
@@ -130,14 +131,19 @@ export function ControlRail({
             value={customHolidayDate}
             onChange={(event) => onCustomHolidayDateChange(event.target.value)}
           />
-          <button type="button" className="add-btn" onClick={onAddCustomHoliday}>
+          <button
+            type="button"
+            className="add-btn"
+            aria-label="Add custom holiday"
+            onClick={onAddCustomHoliday}
+          >
             +
           </button>
         </div>
 
         <div className="custom-list">
           {!customHolidays.length ? (
-            <p className="support-text">No custom holidays yet.</p>
+            <p className="support-text">No custom holidays yet. Add company shutdowns or team days off.</p>
           ) : (
             customHolidays
               .slice()
@@ -150,6 +156,7 @@ export function ControlRail({
                   <button
                     type="button"
                     className="remove-btn"
+                    aria-label={`Remove ${holiday.name}`}
                     onClick={() => onRemoveCustomHoliday(holiday.id)}
                   >
                     &times;

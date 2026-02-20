@@ -28,6 +28,8 @@ describe('planner engine', () => {
 
     expect(metrics.yieldScore).toBeGreaterThanOrEqual(0);
     expect(metrics.longestBreak).toBeGreaterThanOrEqual(0);
+    expect(metrics.utilizationRate).toBeGreaterThanOrEqual(0);
+    expect(metrics.utilizationRate).toBeLessThanOrEqual(100);
     expect(['Low', 'Medium', 'High']).toContain(metrics.unusedRisk);
   });
 });

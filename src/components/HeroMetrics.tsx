@@ -20,6 +20,10 @@ export function HeroMetrics({ metrics }: HeroMetricsProps) {
         <h2>{metrics.microBreaks}</h2>
       </article>
       <article className="hero-card">
+        <p>Utilization</p>
+        <h2>{metrics.utilizationRate.toFixed(1)}%</h2>
+      </article>
+      <article className="hero-card">
         <p>Unused PTO Risk</p>
         <h2>{metrics.unusedRisk}</h2>
       </article>

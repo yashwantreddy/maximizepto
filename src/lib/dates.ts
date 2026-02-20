@@ -16,6 +16,25 @@ export function shortenDate(isoDate: string): string {
   return `${date.getMonth() + 1}/${date.getDate()}`;
 }
 
+export function addDaysToISODate(isoDate: string, delta: number): string {
+  const date = parseISODate(isoDate);
+  date.setDate(date.getDate() + delta);
+  return formatISODate(date);
+}
+
+export function enumerateISODateRange(startIso: string, endIso: string): string[] {
+  const dates: string[] = [];
+  const cursor = parseISODate(startIso);
+  const end = parseISODate(endIso);
+
+  while (cursor <= end) {
+    dates.push(formatISODate(cursor));
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  return dates;
+}
+
 export function getBreakWindows(year: number, offSet: Set<string>): BreakWindow[] {
   const windows: BreakWindow[] = [];
   const cursor = new Date(year, 0, 1);
