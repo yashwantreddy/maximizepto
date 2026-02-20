@@ -20,11 +20,17 @@ coverage/
 .vite/
 playwright-report/
 test-results/
+*.tsbuildinfo
+.eslintcache
 
 # Env files
 .env
 .env.*
 !.env.example
+
+# Package manager caches
+.npm/
+.pnpm-store/
 
 # Editor/IDE
 .idea/
