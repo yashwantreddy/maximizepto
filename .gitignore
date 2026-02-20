@@ -17,6 +17,9 @@ dist/
 build/
 coverage/
 .cache/
+.vite/
+playwright-report/
+test-results/
 
 # Env files
 .env

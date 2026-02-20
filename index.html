@@ -1,141 +1,21 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MaximizePTO | Escape Atelier 2026</title>
-  <meta name="description" content="Plan longer vacations by maximizing PTO around weekends and holidays.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <meta name="description" content="Plan longer vacations by maximizing PTO around weekends and holidays." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
     href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Manrope:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+    rel="stylesheet" />
 </head>
 
 <body>
-  <div class="atmosphere" aria-hidden="true">
-    <div class="sun"></div>
-    <div class="mesh mesh-a"></div>
-    <div class="mesh mesh-b"></div>
-    <div class="grain"></div>
-  </div>
-
-  <div class="site-shell">
-    <header class="hero">
-      <p class="eyebrow">PTO Escape Atelier</p>
-      <h1>Plan Longer Vacations With the Leave You Already Have</h1>
-      <p class="hero-copy">Transform routine leave days into strategic long breaks. Build your 2026 escape seasons with
-        ranked recommendations and a visual planning canvas.</p>
-
-      <div class="hero-metrics">
-        <article class="hero-card">
-          <p>Vacation Yield</p>
-          <h2 id="yield-score">0.0x</h2>
-        </article>
-        <article class="hero-card">
-          <p>Longest Break</p>
-          <h2 id="longest-break">0 days</h2>
-        </article>
-        <article class="hero-card">
-          <p>Micro Breaks</p>
-          <h2 id="micro-breaks">0</h2>
-        </article>
-        <article class="hero-card">
-          <p>Unused PTO Risk</p>
-          <h2 id="unused-risk">Low</h2>
-        </article>
-      </div>
-    </header>
-
-    <div class="workspace-grid">
-      <aside class="control-rail panel">
-        <section class="section-block">
-          <h3>Planner Inputs</h3>
-          <label for="accrual-rate">Monthly PTO Accrual</label>
-          <div class="input-wrap">
-            <input type="number" id="accrual-rate" value="1.5" min="0" step="0.1">
-            <span>days</span>
-          </div>
-          <p class="support-text">Annual total: <strong id="annual-total">18.0</strong> days</p>
-        </section>
-
-        <section class="section-block">
-          <h3>Intensity</h3>
-          <label for="aggressiveness">Strategy Aggressiveness</label>
-          <input type="range" id="aggressiveness" min="1" max="3" step="1" value="2">
-          <div class="scale-row">
-            <span>Chill</span>
-            <strong id="aggressiveness-label">Balanced</strong>
-            <span>Max Out</span>
-          </div>
-          <div class="preset-row" role="group" aria-label="Strategy presets">
-            <button class="preset-btn" data-level="1">Chill</button>
-            <button class="preset-btn active" data-level="2">Balanced</button>
-            <button class="preset-btn" data-level="3">Max Out</button>
-          </div>
-        </section>
-
-        <section class="section-block">
-          <h3>Observed Holidays</h3>
-          <div id="holiday-toggle-list" class="holiday-list"></div>
-        </section>
-
-        <section class="section-block">
-          <h3>Add Custom Holiday</h3>
-          <div class="custom-form">
-            <input type="text" id="custom-h-name" placeholder="Name (Team Retreat Day)">
-            <input type="date" id="custom-h-date" min="2026-01-01" max="2026-12-31">
-            <button id="add-custom-h" class="add-btn" aria-label="Add custom holiday">+</button>
-          </div>
-          <div id="custom-holidays-list" class="custom-list"></div>
-        </section>
-
-        <section class="section-block totals-block">
-          <article>
-            <p>Suggested PTO</p>
-            <h4 id="pto-used">0</h4>
-          </article>
-          <article>
-            <p>Remaining</p>
-            <h4 id="pto-remaining">18.0</h4>
-          </article>
-        </section>
-      </aside>
-
-      <main class="plan-stage">
-        <section class="panel studio-panel">
-          <div class="studio-header">
-            <div>
-              <p class="eyebrow">Strategy Studio</p>
-              <h3>Recommended Escape Windows</h3>
-            </div>
-            <p id="energy-line" class="energy-line">Build momentum by selecting a strategy.</p>
-          </div>
-          <div id="suggestions-list" class="suggestions-list"></div>
-        </section>
-
-        <section class="panel calendar-panel">
-          <div class="calendar-head">
-            <div>
-              <p class="eyebrow">Calendar Canvas</p>
-              <h3>2026 Planner</h3>
-            </div>
-            <div class="legend">
-              <span><i class="dot holiday"></i>Holiday</span>
-              <span><i class="dot pto"></i>Suggested PTO</span>
-              <span><i class="dot focus"></i>Selected Strategy</span>
-              <span><i class="dot weekend"></i>Weekend</span>
-            </div>
-          </div>
-          <div id="calendar-grid" class="calendar-grid"></div>
-        </section>
-      </main>
-    </div>
-  </div>
-
-  <script src="script.js"></script>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
 </body>
 
 </html>

@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/types.ts","./src/vite-env.d.ts","./src/components/calendarcanvas.tsx","./src/components/controlrail.tsx","./src/components/herometrics.tsx","./src/components/strategystudio.tsx","./src/data/holidays.ts","./src/lib/dates.ts","./src/lib/planner.ts","./src/test/planner.test.ts","./src/test/setup.ts"],"version":"5.9.3"}
